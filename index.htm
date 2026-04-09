@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<title>Tableau de Bord du Bureau des Conseillers</title>
+<style>
+body { font-family: Arial; padding:20px; background:#f5f5f5 }
+.card { background:white; padding:15px; margin-bottom:15px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+input, select, button { padding:8px; margin:5px }
+.red { background:#e74c3c; color:white; padding:5px 10px; border-radius:5px }
+.yellow { background:#f1c40f; padding:5px 10px; border-radius:5px }
+.green { background:#2ecc71; color:white; padding:5px 10px; border-radius:5px }
+.small { font-size:12px; color:#555 }
+</style>
+</head>
+<body>
+
+<h1>📊 Tableau de Bord du Bureau des Conseillers</h1>
+
+<div class="card">
+<h3>📅 Mois d'évaluation</h3>
+<select id="mois" onchange="render()">
+<option>Janvier</option><option>Février</option><option>Mars</option>
+<option selected="selected">Avril</option><option>Mai</option><option>Juin</option>
+<option>Juillet</option><option>Août</option><option>Septembre</option>
+<option>Octobre</option><option>Novembre</option><option>Décembre</option>
+</select>
+</div>
+
+<div class="card">
+<h3>➕ Ajouter Conseiller</h3>
+<input id="nom" placeholder="Nom">
+<button onclick="addConseiller()">Ajouter</button>
+</div>
+
+<div class="card">
+<h3>⚙️ Activités</h3>
+<input id="newAct" placeholder="Nouvelle activité" value="Activités de renforcement des capacités personnelles ou professionnelles du conseiller">
+<button onclick="addActivity()">Ajouter</button>
+<div id="activities">Rencontres Individuelles <button onclick="deleteActivity(0)">❌</button><br>Suivis ICT  <button onclick="deleteActivity(1)">❌</button><br>Mise à jour des notes <button onclick="deleteActivity(2)">❌</button><br>Enregistrement des notes universitaires sur Bazla <button onclick="deleteActivity(3)">❌</button><br>Vérification des notes (Mon Portail/Bulletins) <button onclick="deleteActivity(4)">❌</button><br>Participation aux Rencontres (DAE, Advising) <button onclick="deleteActivity(5)">❌</button><br>Visite CHE <button onclick="deleteActivity(6)">❌</button><br>Enregistrement des rapport des rencontres individuelles sur Bazla <button onclick="deleteActivity(7)">❌</button><br>Enregistrement du rapport mensuel sur Sharepoint <button onclick="deleteActivity(8)">❌</button><br>Suivis Histoire Sociale <button onclick="deleteActivity(9)">❌</button><br>Suivis "Individual Folders" sur SharePoint <button onclick="deleteActivity(10)">❌</button><br>Surveillance académique (cheminement, performance des boursiers à l'université <button onclick="deleteActivity(11)">❌</button><br>Activités de renforcement des capacités personnelles ou professionnelles du conseiller <button onclick="deleteActivity(12)">❌</button></div>
+</div>
+
+<div class="card">
+<h3>💾 Sauvegarde / Partage</h3>
+<button onclick="exportData()">📤 Exporter (OneDrive)</button>
+<input type="file" onchange="importData(event)">
+<p class="small">👉 Exporte le fichier puis upload-le sur OneDrive / SharePoint et partage-le.</p>
+</div>
+
+<div class="card">
+<h3>📈 Score global équipe</h3>
+<div id="global">10%</div>
+</div>
+
+<div class="card">
+<h3>🏆 Classement</h3>
+<div id="ranking">1. ADOLPHE - 70%<br>2. ANTOINE - 0%<br>3. BIEN AIME - 0%<br>4. FANFAN - 0%<br>5. JANVIER - 0%<br>6. LOUIS-JEUNE - 0%<br>7. SALOMON - 0%<br></div>
+</div>
+
+<div id="conseillers"><div class="card">
+  <b contenteditable="" onblur="editName(0,this.innerText)">ADOLPHE</b>
+  <button onclick="deleteConseiller(0)">🗑️</button>
+  <br>
+  <span class="yellow">70% - Moyen</span>
+  <div class="small"><i>Tu progresses, continue !</i></div><div>Rencontres Individuelles
+   <select onchange="update(0,'Rencontres Individuelles',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis ICT 
+   <select onchange="update(0,'Suivis ICT ',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Mise à jour des notes
+   <select onchange="update(0,'Mise à jour des notes',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des notes universitaires sur Bazla
+   <select onchange="update(0,'Enregistrement des notes universitaires sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Vérification des notes (Mon Portail/Bulletins)
+   <select onchange="update(0,'Vérification des notes (Mon Portail/Bulletins)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Participation aux Rencontres (DAE, Advising)
+   <select onchange="update(0,'Participation aux Rencontres (DAE, Advising)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Visite CHE
+   <select onchange="update(0,'Visite CHE',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des rapport des rencontres individuelles sur Bazla
+   <select onchange="update(0,'Enregistrement des rapport des rencontres individuelles sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement du rapport mensuel sur Sharepoint
+   <select onchange="update(0,'Enregistrement du rapport mensuel sur Sharepoint',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis Histoire Sociale
+   <select onchange="update(0,'Suivis Histoire Sociale',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis "Individual Folders" sur SharePoint
+   <select onchange="update(0,'Suivis " individual="" folders"="" sur="" sharepoint',this.value)"="">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Surveillance académique (cheminement, performance des boursiers à l'université
+   <select onchange="update(0,'Surveillance académique (cheminement, performance des boursiers à l'université',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Activités de renforcement des capacités personnelles ou professionnelles du conseiller
+   <select onchange="update(0,'Activités de renforcement des capacités personnelles ou professionnelles du conseiller',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div></div><div class="card">
+  <b contenteditable="" onblur="editName(1,this.innerText)">ANTOINE</b>
+  <button onclick="deleteConseiller(1)">🗑️</button>
+  <br>
+  <span class="red">0% - Faible</span>
+  <div class="small"><i>Tu dois te rattraper</i></div><div>Rencontres Individuelles
+   <select onchange="update(1,'Rencontres Individuelles',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis ICT 
+   <select onchange="update(1,'Suivis ICT ',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Mise à jour des notes
+   <select onchange="update(1,'Mise à jour des notes',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des notes universitaires sur Bazla
+   <select onchange="update(1,'Enregistrement des notes universitaires sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Vérification des notes (Mon Portail/Bulletins)
+   <select onchange="update(1,'Vérification des notes (Mon Portail/Bulletins)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Participation aux Rencontres (DAE, Advising)
+   <select onchange="update(1,'Participation aux Rencontres (DAE, Advising)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Visite CHE
+   <select onchange="update(1,'Visite CHE',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des rapport des rencontres individuelles sur Bazla
+   <select onchange="update(1,'Enregistrement des rapport des rencontres individuelles sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement du rapport mensuel sur Sharepoint
+   <select onchange="update(1,'Enregistrement du rapport mensuel sur Sharepoint',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis Histoire Sociale
+   <select onchange="update(1,'Suivis Histoire Sociale',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis "Individual Folders" sur SharePoint
+   <select onchange="update(1,'Suivis " individual="" folders"="" sur="" sharepoint',this.value)"="">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Surveillance académique (cheminement, performance des boursiers à l'université
+   <select onchange="update(1,'Surveillance académique (cheminement, performance des boursiers à l'université',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Activités de renforcement des capacités personnelles ou professionnelles du conseiller
+   <select onchange="update(1,'Activités de renforcement des capacités personnelles ou professionnelles du conseiller',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div></div><div class="card">
+  <b contenteditable="" onblur="editName(2,this.innerText)">BIEN AIME</b>
+  <button onclick="deleteConseiller(2)">🗑️</button>
+  <br>
+  <span class="red">0% - Faible</span>
+  <div class="small"><i>Tu dois te rattraper</i></div><div>Rencontres Individuelles
+   <select onchange="update(2,'Rencontres Individuelles',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis ICT 
+   <select onchange="update(2,'Suivis ICT ',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Mise à jour des notes
+   <select onchange="update(2,'Mise à jour des notes',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des notes universitaires sur Bazla
+   <select onchange="update(2,'Enregistrement des notes universitaires sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Vérification des notes (Mon Portail/Bulletins)
+   <select onchange="update(2,'Vérification des notes (Mon Portail/Bulletins)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Participation aux Rencontres (DAE, Advising)
+   <select onchange="update(2,'Participation aux Rencontres (DAE, Advising)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Visite CHE
+   <select onchange="update(2,'Visite CHE',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des rapport des rencontres individuelles sur Bazla
+   <select onchange="update(2,'Enregistrement des rapport des rencontres individuelles sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement du rapport mensuel sur Sharepoint
+   <select onchange="update(2,'Enregistrement du rapport mensuel sur Sharepoint',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis Histoire Sociale
+   <select onchange="update(2,'Suivis Histoire Sociale',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis "Individual Folders" sur SharePoint
+   <select onchange="update(2,'Suivis " individual="" folders"="" sur="" sharepoint',this.value)"="">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Surveillance académique (cheminement, performance des boursiers à l'université
+   <select onchange="update(2,'Surveillance académique (cheminement, performance des boursiers à l'université',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Activités de renforcement des capacités personnelles ou professionnelles du conseiller
+   <select onchange="update(2,'Activités de renforcement des capacités personnelles ou professionnelles du conseiller',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div></div><div class="card">
+  <b contenteditable="" onblur="editName(3,this.innerText)">FANFAN</b>
+  <button onclick="deleteConseiller(3)">🗑️</button>
+  <br>
+  <span class="red">0% - Faible</span>
+  <div class="small"><i>Tu dois te rattraper</i></div><div>Rencontres Individuelles
+   <select onchange="update(3,'Rencontres Individuelles',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis ICT 
+   <select onchange="update(3,'Suivis ICT ',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Mise à jour des notes
+   <select onchange="update(3,'Mise à jour des notes',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des notes universitaires sur Bazla
+   <select onchange="update(3,'Enregistrement des notes universitaires sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Vérification des notes (Mon Portail/Bulletins)
+   <select onchange="update(3,'Vérification des notes (Mon Portail/Bulletins)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Participation aux Rencontres (DAE, Advising)
+   <select onchange="update(3,'Participation aux Rencontres (DAE, Advising)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Visite CHE
+   <select onchange="update(3,'Visite CHE',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des rapport des rencontres individuelles sur Bazla
+   <select onchange="update(3,'Enregistrement des rapport des rencontres individuelles sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement du rapport mensuel sur Sharepoint
+   <select onchange="update(3,'Enregistrement du rapport mensuel sur Sharepoint',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis Histoire Sociale
+   <select onchange="update(3,'Suivis Histoire Sociale',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis "Individual Folders" sur SharePoint
+   <select onchange="update(3,'Suivis " individual="" folders"="" sur="" sharepoint',this.value)"="">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Surveillance académique (cheminement, performance des boursiers à l'université
+   <select onchange="update(3,'Surveillance académique (cheminement, performance des boursiers à l'université',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Activités de renforcement des capacités personnelles ou professionnelles du conseiller
+   <select onchange="update(3,'Activités de renforcement des capacités personnelles ou professionnelles du conseiller',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div></div><div class="card">
+  <b contenteditable="" onblur="editName(4,this.innerText)">JANVIER</b>
+  <button onclick="deleteConseiller(4)">🗑️</button>
+  <br>
+  <span class="red">0% - Faible</span>
+  <div class="small"><i>Tu dois te rattraper</i></div><div>Rencontres Individuelles
+   <select onchange="update(4,'Rencontres Individuelles',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis ICT 
+   <select onchange="update(4,'Suivis ICT ',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Mise à jour des notes
+   <select onchange="update(4,'Mise à jour des notes',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des notes universitaires sur Bazla
+   <select onchange="update(4,'Enregistrement des notes universitaires sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Vérification des notes (Mon Portail/Bulletins)
+   <select onchange="update(4,'Vérification des notes (Mon Portail/Bulletins)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Participation aux Rencontres (DAE, Advising)
+   <select onchange="update(4,'Participation aux Rencontres (DAE, Advising)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Visite CHE
+   <select onchange="update(4,'Visite CHE',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des rapport des rencontres individuelles sur Bazla
+   <select onchange="update(4,'Enregistrement des rapport des rencontres individuelles sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement du rapport mensuel sur Sharepoint
+   <select onchange="update(4,'Enregistrement du rapport mensuel sur Sharepoint',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis Histoire Sociale
+   <select onchange="update(4,'Suivis Histoire Sociale',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis "Individual Folders" sur SharePoint
+   <select onchange="update(4,'Suivis " individual="" folders"="" sur="" sharepoint',this.value)"="">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Surveillance académique (cheminement, performance des boursiers à l'université
+   <select onchange="update(4,'Surveillance académique (cheminement, performance des boursiers à l'université',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Activités de renforcement des capacités personnelles ou professionnelles du conseiller
+   <select onchange="update(4,'Activités de renforcement des capacités personnelles ou professionnelles du conseiller',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div></div><div class="card">
+  <b contenteditable="" onblur="editName(5,this.innerText)">LOUIS-JEUNE</b>
+  <button onclick="deleteConseiller(5)">🗑️</button>
+  <br>
+  <span class="red">0% - Faible</span>
+  <div class="small"><i>Tu dois te rattraper</i></div><div>Rencontres Individuelles
+   <select onchange="update(5,'Rencontres Individuelles',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis ICT 
+   <select onchange="update(5,'Suivis ICT ',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Mise à jour des notes
+   <select onchange="update(5,'Mise à jour des notes',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des notes universitaires sur Bazla
+   <select onchange="update(5,'Enregistrement des notes universitaires sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Vérification des notes (Mon Portail/Bulletins)
+   <select onchange="update(5,'Vérification des notes (Mon Portail/Bulletins)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Participation aux Rencontres (DAE, Advising)
+   <select onchange="update(5,'Participation aux Rencontres (DAE, Advising)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Visite CHE
+   <select onchange="update(5,'Visite CHE',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des rapport des rencontres individuelles sur Bazla
+   <select onchange="update(5,'Enregistrement des rapport des rencontres individuelles sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement du rapport mensuel sur Sharepoint
+   <select onchange="update(5,'Enregistrement du rapport mensuel sur Sharepoint',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis Histoire Sociale
+   <select onchange="update(5,'Suivis Histoire Sociale',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis "Individual Folders" sur SharePoint
+   <select onchange="update(5,'Suivis " individual="" folders"="" sur="" sharepoint',this.value)"="">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Surveillance académique (cheminement, performance des boursiers à l'université
+   <select onchange="update(5,'Surveillance académique (cheminement, performance des boursiers à l'université',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Activités de renforcement des capacités personnelles ou professionnelles du conseiller
+   <select onchange="update(5,'Activités de renforcement des capacités personnelles ou professionnelles du conseiller',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div></div><div class="card">
+  <b contenteditable="" onblur="editName(6,this.innerText)">SALOMON</b>
+  <button onclick="deleteConseiller(6)">🗑️</button>
+  <br>
+  <span class="red">0% - Faible</span>
+  <div class="small"><i>Tu dois te rattraper</i></div><div>Rencontres Individuelles
+   <select onchange="update(6,'Rencontres Individuelles',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis ICT 
+   <select onchange="update(6,'Suivis ICT ',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Mise à jour des notes
+   <select onchange="update(6,'Mise à jour des notes',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des notes universitaires sur Bazla
+   <select onchange="update(6,'Enregistrement des notes universitaires sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Vérification des notes (Mon Portail/Bulletins)
+   <select onchange="update(6,'Vérification des notes (Mon Portail/Bulletins)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Participation aux Rencontres (DAE, Advising)
+   <select onchange="update(6,'Participation aux Rencontres (DAE, Advising)',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Visite CHE
+   <select onchange="update(6,'Visite CHE',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement des rapport des rencontres individuelles sur Bazla
+   <select onchange="update(6,'Enregistrement des rapport des rencontres individuelles sur Bazla',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Enregistrement du rapport mensuel sur Sharepoint
+   <select onchange="update(6,'Enregistrement du rapport mensuel sur Sharepoint',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis Histoire Sociale
+   <select onchange="update(6,'Suivis Histoire Sociale',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Suivis "Individual Folders" sur SharePoint
+   <select onchange="update(6,'Suivis " individual="" folders"="" sur="" sharepoint',this.value)"="">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Surveillance académique (cheminement, performance des boursiers à l'université
+   <select onchange="update(6,'Surveillance académique (cheminement, performance des boursiers à l'université',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div><div>Activités de renforcement des capacités personnelles ou professionnelles du conseiller
+   <select onchange="update(6,'Activités de renforcement des capacités personnelles ou professionnelles du conseiller',this.value)">
+   <option selected="selected"></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div></div></div>
+
+<script>
+let activities = JSON.parse(localStorage.getItem("activities")) || ["Rencontres","Rapport","Réunions"];
+let conseillers = JSON.parse(localStorage.getItem("data")) || [];
+
+function save(){
+ localStorage.setItem("data", JSON.stringify(conseillers));
+ localStorage.setItem("activities", JSON.stringify(activities));
+}
+
+function currentMonth(){ return document.getElementById("mois").value; }
+
+function addActivity(){
+ const val = document.getElementById("newAct").value;
+ if(!val) return;
+ activities.push(val);
+ save(); render();
+}
+
+function deleteActivity(i){
+ const act = activities[i];
+ activities.splice(i,1);
+ conseillers.forEach(c=>{
+  for(let m in c.data){ delete c.data[m][act]; }
+ });
+ save(); render();
+}
+
+function addConseiller(){
+ const nom = document.getElementById("nom").value;
+ if(!nom) return;
+ conseillers.push({nom, data:{}});
+ save(); render();
+}
+
+function deleteConseiller(i){
+ conseillers.splice(i,1);
+ save(); render();
+}
+
+function score(data){
+ let t=0,c=0;
+ for(let k in data){
+  if(data[k]==="N/A") continue;
+  c++;
+  if(data[k]==="Réalisé") t+=1;
+  if(data[k]==="Partiel") t+=0.5;
+ }
+ return c? t/c : 0;
+}
+
+function appreciation(s){
+ if(s<0.5) return ["Faible","red","Tu dois te rattraper"];
+ if(s<0.75) return ["Moyen","yellow","Tu progresses, continue !"];
+ if(s<0.9) return ["Bon","green","Bravo"];
+ return ["Excellent","green","Félicitations"];
+}
+
+function render(){
+ const mois = currentMonth();
+ document.getElementById("activities").innerHTML = activities.map((a,i)=>
+ `${a} <button onclick="deleteActivity(${i})">❌</button>`).join("<br>");
+ 
+ let html="";
+ conseillers.forEach((c,i)=>{
+  if(!c.data[mois]){
+   c.data[mois]={};
+   activities.forEach(a=>c.data[mois][a]="");
+  }
+
+  let s=score(c.data[mois]);
+  let [txt,color,comment]=appreciation(s);
+
+  html+=`<div class="card">
+  <b contenteditable onblur="editName(${i},this.innerText)">${c.nom}</b>
+  <button onclick="deleteConseiller(${i})">🗑️</button>
+  <br>
+  <span class="${color}">${Math.round(s*100)}% - ${txt}</span>
+  <div class="small"><i>${comment}</i></div>`;
+
+  activities.forEach(a=>{
+   html+=`<div>${a}
+   <select onchange="update(${i},'${a}',this.value)">
+   <option></option>
+   <option>Réalisé</option>
+   <option>Partiel</option>
+   <option>Non réalisé</option>
+   <option>N/A</option>
+   </select></div>`;
+  });
+
+  html+="</div>";
+ });
+ document.getElementById("conseillers").innerHTML=html;
+
+ let g=0;
+ conseillers.forEach(c=>{
+  if(c.data[mois]) g+=score(c.data[mois]);
+ });
+ g = conseillers.length? g/conseillers.length:0;
+ document.getElementById("global").innerText = Math.round(g*100)+"%";
+
+ let rank = [...conseillers].sort((a,b)=>{
+  let sa = a.data[mois]? score(a.data[mois]):0;
+  let sb = b.data[mois]? score(b.data[mois]):0;
+  return sb-sa;
+ });
+ let rhtml="";
+ rank.forEach((c,i)=>{
+  let sc = c.data[mois]? score(c.data[mois]):0;
+  rhtml+=`${i+1}. ${c.nom} - ${Math.round(sc*100)}%<br>`;
+ });
+ document.getElementById("ranking").innerHTML=rhtml;
+}
+
+function update(i,a,v){
+ const mois = currentMonth();
+ conseillers[i].data[mois][a]=v;
+ save(); render();
+}
+
+function editName(i,val){
+ conseillers[i].nom = val;
+ save();
+}
+
+// EXPORT / IMPORT (OneDrive / partage)
+function exportData(){
+ const data = {activities, conseillers};
+ const blob = new Blob([JSON.stringify(data)], {type:"application/json"});
+ const a = document.createElement("a");
+ a.href = URL.createObjectURL(blob);
+ a.download = "dashboard_conseillers.json";
+ a.click();
+}
+
+function importData(e){
+ const file = e.target.files[0];
+ const reader = new FileReader();
+ reader.onload = function(){
+  const data = JSON.parse(reader.result);
+  activities = data.activities || [];
+  conseillers = data.conseillers || [];
+  save(); render();
+ };
+ reader.readAsText(file);
+}
+
+render();
+</script>
+
+
+
+</body></html>
